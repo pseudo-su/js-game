@@ -1,0 +1,36 @@
+image: node:4.2.2
+variables:
+  CI: ""
+stages:
+  - install
+  # - test
+  - build
+  - deploy
+
+install:
+  stage: install 
+  script: npm install
+  before_script:
+  artifacts:
+    paths:
+    - node_modules
+
+# test:
+#   stage: test
+#   script: npm run test
+
+build:
+  stage: build
+  script: npm run build
+  artifacts:
+    paths:
+    - build
+
+pages:
+  stage: deploy
+  script: ls build
+  artifacts:
+    paths:
+    - build
+  only:
+    - master
