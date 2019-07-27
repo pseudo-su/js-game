@@ -23,11 +23,11 @@ class GridScene {
     this.grid = new Grid();
     this.zones = [
       new Zone('1', {x: 1, y: 1, width: 3, height: 4}, 0),
-      new Zone('2', {x: 4, y: 2, width: 3, height: 2}, 1),
-      new Zone('3', {x: 7, y: 2, width: 3, height: 3}, 2),
-      new Zone('4', {x: 6, y: 5, width: 4, height: 5}, 3),
-      new Zone('5', {x: 0, y: 5, width: 5, height: 5}, 4),
-      new Zone('6', {x: 5, y: 5, width: 1, height: 2}, 5),
+      new Zone('2', {x: 4, y: 2, width: 4, height: 2}, 1),
+      new Zone('3', {x: 8, y: 2, width: 2, height: 3}, 2),
+      new Zone('4', {x: 7, y: 5, width: 3, height: 5}, 3),
+      new Zone('5', {x: 5, y: 0, width: 2, height: 7}, 4),
+      new Zone('6', {x: 0, y: 5, width: 5, height: 5}, 5),
     ];
     this.zones = this.zones.map(zone => {
       zone.nearbyZones = this.zones
@@ -47,9 +47,13 @@ class GridScene {
   render() {
     background(...grass_values);
     this.grid.render();
-    this.zones.forEach(zone => zone.render())
+
     this.person.move()
-    this.person.render();
+    
+    const sceneRenderables = [
+      ...this.zones,
+      this.person,
+    ].sort((a, b) => a.zIndex > b.zIndex).forEach(zone => zone.render())
   }
 }
 

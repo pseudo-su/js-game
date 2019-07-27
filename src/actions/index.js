@@ -63,6 +63,9 @@ export function pointOutsideScene(scene, {x, y}) {
   return squareOutsideScene(scene, {start: {x,y}, end: {x,y}}).any
 }
 
+export function squareLeftScene(scene, square) {
+  return square && square.start && square.end && pointOutsideScene(scene, square.start) && pointOutsideScene(scene, square.end)
+}
 
 export function squareOutsideScene(scene, square) {
   const left = square.start.x < scene.start.x;
@@ -95,32 +98,34 @@ export function isBlockedMovingIntoNewZone(blocked, nearbyZones, square, partial
       const down = blocked.down? (
         !sceneBlocked.left && !sceneBlocked.right && !sceneBlocked.down
       ): false;
-      const horizontal = blocked.horizontal? left || right: false;
-      const vertical = blocked.vertical? left || right: false;
+
+      const horizontal = blocked.horizontal? (left || right): false;
+      const vertical = blocked.vertical? (left || right): false;
 
       return {
         horizontal, vertical, left, up, right, down, zone
       }
     });
     // moving into zones can move
-    const leftMove = canMove.reduce((prev, item) => prev || item.left? item.zone: false, false);
-    const upMove = canMove.reduce((prev, item) => prev || item.up? item.zone: false, false);
-    const rightMove = canMove.reduce((prev, item) => prev || item.right? item.zone: false, false);
-    const downMove = canMove.reduce((prev, item) => prev || item.down? item.zone: false, false);
+    const leftMove = canMove.reduce((acc, item) => acc || (item.left? item.zone: false), false);
+    const upMove = canMove.reduce((acc, item) => acc || (item.up? item.zone: false), false);
+    const rightMove = canMove.reduce((acc, item) => acc || (item.right? item.zone: false), false);
+    const downMove = canMove.reduce((acc, item) => acc || (item.down? item.zone: false), false);
 
     const partialZone = leftMove || upMove || rightMove || downMove;
 
     // Is the user blocked in directions
     const partialZoneBlocked = partiallyInside? squareOutsideScene(partiallyInside.points, square): false;
-    const left = (blocked.left && !leftMove);
-    const up = (blocked.up && !upMove) || (partialZoneBlocked && partialZoneBlocked.up);
-    const right = (blocked.right && !rightMove);
-    const down = (blocked.down && !downMove) || (partialZoneBlocked && partialZoneBlocked.down);
 
-    if(left) console.log('blocked left')
-    if(up) console.log('blocked up')
-    if(right) console.log('blocked right')
-    if(down) console.log('blocked down')
+    const left = (blocked.left && !leftMove) || (partialZoneBlocked.left && (blocked.up || blocked.down));
+    const up = (blocked.up && !upMove) || (partialZoneBlocked.up && (blocked.left || blocked.right));
+    const right = (blocked.right && !rightMove) || (partialZoneBlocked.right && (blocked.up || blocked.down));
+    const down = (blocked.down && !downMove) || (partialZoneBlocked.down && (blocked.left || blocked.right));
+
+    // if(left) console.log('blocked left')
+    // if(up) console.log('blocked up')
+    // if(right) console.log('blocked right')
+    // if(down) console.log('blocked down')
 
     const horizontal = left || right;
     const vertical = up || down;
